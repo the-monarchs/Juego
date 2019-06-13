@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public enum GameState { Idle, Playing, Ended }; //parado oo jugando, un enum es una lista de opciones
 //public enum GameState { Idle, Playing,Ended }; //parado oo jugando, un enum es una lista de opciones
 public class GameController : MonoBehaviour
@@ -15,24 +15,35 @@ public class GameController : MonoBehaviour
     public GameObject player;
     public GameObject EnemyGenerator; //Enlazo el game Object, Desde nuestro main Canvas para poder utilizarlo aca.
     private AudioSource MusicPlayer;
-    public Text pointstext;
+    public Text lblScorePoints;
+    public Text lblHighScorePoints;
+    public Text lblTimeState;
     float scaleTime = 6f;
     float scaleInc = 0.25f;
     private int Point = 0;
+    private int vHighScore = 0;
+    private int vTimeState = 300;
     void Start()
     {
+        lblScorePoints.text = "0";
+        lblTimeState.text = "300";
         MusicPlayer = GetComponent<AudioSource>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        
+       
         // empezamos el juego
         // re hacer 2 condicionales If. prepguntamos si estamos quieto, y despues si aprieta una tecla
         if (gamestate == GameState.Idle)
         {
             if (Input.GetKeyDown("up") || Input.GetMouseButtonDown(0))
             {
+                vTimeState--;
+                lblTimeState.text = (vTimeState * -60f * Time.deltaTime).ToString();
                 //tecla flecha arriba / o el boton de el mouse posicion 0       {
                 gamestate = GameState.Playing; // el stado de el juego cambio a playing.
                 uiIdle.SetActive(false);
@@ -41,9 +52,6 @@ public class GameController : MonoBehaviour
                 //llamamos a la el otro script.
                 EnemyGenerator.SendMessage("StartGenerator"); //Llamamos y hacemos que empieze el generador
                 MusicPlayer.Play();
-
-
-
                 InvokeRepeating("GameTimeScale", scaleTime, scaleTime); // lo llamamos repitiendo cada 6 seg
             }
         }
@@ -67,7 +75,7 @@ public class GameController : MonoBehaviour
         Background.uvRect = new Rect(Background.uvRect.x + finalspeed, 0f, 1f, 1f);
         // ahora para la plataforma 
         Platform.uvRect = new Rect(Platform.uvRect.x + finalspeed * 3, 0f, 1f, 1f);
-        
+
     }
     /// <summary>
     /// reinicio de juego
@@ -85,11 +93,17 @@ public class GameController : MonoBehaviour
     {
         CancelInvoke("GameTimeScale");
         Time.timeScale = 1f;
-        Debug.Log("Ritmo Restablecido"+ Time.timeScale.ToString());
+        Debug.Log("Ritmo Restablecido" + Time.timeScale.ToString());
     }
     public void IncreasePoints()
     {
         Point++;
-        pointstext.text = Point.ToString();
+        lblScorePoints.text = Point.ToString();
+        if (vHighScore < Point)
+        {
+            vHighScore = Point;
+        }
+        lblHighScorePoints.text = vHighScore.ToString();
+
     }
 }
